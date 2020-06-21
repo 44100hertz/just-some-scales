@@ -29,20 +29,11 @@ function Fraction.tofrac (n)
 end
 
 function Fraction:simplify ()
-   local neg = self.num * self.denom < 0
-   self.num = math.abs(self.num)
-   self.denom = math.abs(self.denom)
-   local i = 2
-   while i <= 1+math.min(self.num, self.denom) do
-      local n,d = self.num/i, self.denom/i
-      if n % 1.0 == 0 and d % 1.0 == 0 then
-         self.num, self.denom = n,d
-         i = 2
-      else
-         i = i + 1
-      end
+   local function gcd (a,b)
+      return b == 0 and a or gcd(b, a%b)
    end
-   if neg then self.num = -self.num end
+   local d = gcd(self.num,self.denom)
+   self.num, self.denom = self.num/d, self.denom/d
 end
 
 function Fraction:__unm ()

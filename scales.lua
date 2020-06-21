@@ -3,7 +3,11 @@ local F = require 'Fraction'
 local scales = {}
 
 function scales.tuning_string (n)
-   return type(n) == 'table' and n or scales.ratio_to_cents(n)
+   if type(n) == 'table' and not (n.num > 999999999 or n.denom > 999999999) then
+      return n
+   else
+      return scales.ratio_to_cents(n:value())
+   end
 end
 
 function scales.cents_to_ratio (cents) return math.pow(2.0, cents/1200.0) end
@@ -58,7 +62,6 @@ function scales.meantone (num_notes, ratio, octave)
       local opposite_index = (i + half_num_notes - 1) % num_notes + 1
       local opposite = rat[opposite_index] / half_octave_ratio
       if opposite <= 1.0 then opposite = opposite * octave end
-      print(rat[i]:value(), opposite:value())
       t[i] = (rat[i] + opposite) / 2.0
    end
    return t
@@ -68,13 +71,11 @@ scales.presets = {
    pythagorean = {kind = 'rational', 12, F.new(3,2), F.new(2,1)},
    well = {kind = 'meantone', 12, F.new(3,2), F.new(2,1)},
    major = {kind = 'rational', 7, F.new(3,2), F.new(2,1)},
-   minor = {kind = 'rational', 7, F.new(5,4), F.new(2,2)},
 }
 
 function scales.use_preset(p) return scales[p.kind](table.unpack(p)) end
 function scales.use_preset_name(p) return scales.use_preset(scales.presets[p]) end
 
 function scales.print_scale (s) for _,v in ipairs(s) do print(scales.tuning_string(v)) end end
-scales.print_scale(scales.rational(7, F.new(5,4), F.new(2,1)))
 
 return scales
